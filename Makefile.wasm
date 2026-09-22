@@ -1,0 +1,40 @@
+CC = emcc
+AR = emar
+RANLIB = emranlib
+
+DIST_DIR = dist
+LIBEROFS_A = lib/.libs/liberofs.a
+
+EMCC_FLAGS = -O2 -Iinclude -I. \
+    -s WASM=1 \
+    -s MODULARIZE=1 \
+    -s EXPORT_NAME="createErofsModule" \
+    -s EXPORT_ES6=1 \
+    -s ENVIRONMENT=web \
+    -s FORCE_FILESYSTEM=1 \
+    -s ALLOW_MEMORY_GROWTH=1 \
+    -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "FS", "UTF8ToString", "HEAPU8", "HEAP32"]' \
+    -s EXPORTED_FUNCTIONS='["_malloc", "_free", "_erofs_parse_tree", "_erofs_read_file_data", "_erofs_free_buf"]'
+
+.PHONY: all clean liberofs
+
+all: $(DIST_DIR)/erofs.js
+
+$(LIBEROFS_A):
+	@if [ ! -f "configure" ]; then \
+		./autogen.sh; \
+	fi
+	@if [ ! -f "Makefile" ]; then \
+		emconfigure ./configure --host=wasm32-unknown-emscripten MAX_BLOCK_SIZE=4096 --disable-multithreading --without-zlib --disable-lz4 --disable-lzma --without-uuid; \
+	fi
+	emmake make -C lib
+
+liberofs: $(LIBEROFS_A)
+
+$(DIST_DIR)/erofs.js: wasm/erofs_api.c $(LIBEROFS_A)
+	mkdir -p $(DIST_DIR)
+	$(CC) $(EMCC_FLAGS) wasm/erofs_api.c $(LIBEROFS_A) -o $(DIST_DIR)/erofs.js
+
+clean:
+	rm -rf $(DIST_DIR)
+	if [ -f "Makefile" ]; then make clean || true; fi
