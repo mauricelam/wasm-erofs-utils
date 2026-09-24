@@ -31,14 +31,20 @@ export async function ensureErofsInitialized(options: ErofsModuleOptions = {}): 
     if (!erofsModulePromise) {
         const defaultOptions: ErofsModuleOptions = { ...options };
 
-        // In Node.js environment, read wasm binary directly if not provided
-        if (typeof window === 'undefined' && typeof process !== 'undefined' && process.versions?.node && !defaultOptions.wasmBinary) {
+        // In Node.js environment, polyfill __dirname for Emscripten ESM and read wasm binary directly if not provided
+        if (typeof window === 'undefined' && typeof process !== 'undefined' && process.versions?.node) {
             try {
-                const { readFileSync } = await import('node:fs');
                 const { fileURLToPath } = await import('node:url');
                 const { join, dirname } = await import('node:path');
-                const wasmPath = join(dirname(fileURLToPath(import.meta.url)), '../erofs.wasm');
-                defaultOptions.wasmBinary = readFileSync(wasmPath);
+                const currentDir = dirname(fileURLToPath(import.meta.url));
+                if (typeof (globalThis as any).__dirname === 'undefined') {
+                    (globalThis as any).__dirname = currentDir;
+                }
+                if (!defaultOptions.wasmBinary) {
+                    const { readFileSync } = await import('node:fs');
+                    const wasmPath = join(currentDir, '../erofs.wasm');
+                    defaultOptions.wasmBinary = readFileSync(wasmPath);
+                }
             } catch (e) {
                 // fallback
             }
