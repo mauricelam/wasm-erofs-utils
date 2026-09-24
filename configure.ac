@@ -456,8 +456,10 @@ AS_IF([test "x$enable_lz4" != "xno"], [
     LIBS="${saved_LIBS}"
     CPPFLAGS="${saved_CPPFLAGS}"
   ], [[]])
-  AS_IF([test "x$enable_lz4" = "xyes" -a "x$have_lz4" != "xyes"], [
-    AC_MSG_ERROR([Cannot find a proper liblz4 version])
+  AS_IF([test "x$have_lz4" != "xyes"], [
+    have_lz4="yes"
+    have_lz4hc="yes"
+    lz4_internal="yes"
   ])
 ])
 
@@ -804,6 +806,7 @@ AM_CONDITIONAL([ENABLE_FUZZING], [test "x${enable_fuzzing}" = "xyes"])
 AM_CONDITIONAL([ENABLE_EROFS_MT], [test "x${enable_multithreading}" != "xno"])
 AM_CONDITIONAL([ENABLE_LZ4], [test "x${have_lz4}" = "xyes"])
 AM_CONDITIONAL([ENABLE_LZ4HC], [test "x${have_lz4hc}" = "xyes"])
+AM_CONDITIONAL([ENABLE_LZ4_INTERNAL], [test "x${lz4_internal}" = "xyes"])
 AM_CONDITIONAL([ENABLE_FUSE], [test "x${have_fuse}" = "xyes"])
 AM_CONDITIONAL([ENABLE_LIBLZMA], [test "x${have_liblzma}" = "xyes"])
 AM_CONDITIONAL([ENABLE_LIBDEFLATE], [test "x${have_libdeflate}" = "xyes"])
