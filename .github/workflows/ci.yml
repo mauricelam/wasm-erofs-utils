@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'dev'
+  pull_request:
+    branches:
+      - 'master'
+      - 'dev'
+
+permissions:
+  contents: read
+
+jobs:
+  native-build:
+    name: Native erofs-utils Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool pkg-config uuid-dev zlib1g-dev liblz4-dev liblzma-dev libssl-dev
+
+      - name: Build Native
+        run: |
+          ./autogen.sh
+          ./configure
+          make -j$(nproc)
+
+  wasm-test:
+    name: WASM & TypeScript Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build and Test
+        run: npm test
