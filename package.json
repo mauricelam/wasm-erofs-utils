@@ -1,0 +1,33 @@
+{
+  "name": "@mauricelam/erofs-wasm",
+  "version": "1.0.0",
+  "description": "EROFS filesystem WebAssembly wrapper and TypeScript bindings",
+  "type": "module",
+  "main": "dist/typescript/index.js",
+  "types": "dist/typescript/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/typescript/index.d.ts",
+      "default": "./dist/typescript/index.js"
+    }
+  },
+  "scripts": {
+    "build:wasm": "make -f Makefile.wasm",
+    "build:ts": "tsc",
+    "build": "npm run build:wasm && npm run build:ts",
+    "prepublishOnly": "npm run build",
+    "test": "npm run build && node --test test/erofs.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "typescript",
+    "wasm",
+    "Makefile.wasm",
+    "README.wasm.md"
+  ],
+  "license": "GPL-2.0-or-later OR MIT"
+}
