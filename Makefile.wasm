@@ -10,21 +10,23 @@ EMCC_FLAGS = -O2 -Iinclude -I. \
     -s MODULARIZE=1 \
     -s EXPORT_NAME="createErofsModule" \
     -s EXPORT_ES6=1 \
-    -s ENVIRONMENT=web \
+    -s ENVIRONMENT=web,node \
     -s FORCE_FILESYSTEM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "FS", "UTF8ToString", "HEAPU8", "HEAP32"]' \
     -s EXPORTED_FUNCTIONS='["_malloc", "_free", "_erofs_parse_tree", "_erofs_read_file_data", "_erofs_free_buf"]'
 
-.PHONY: all clean liberofs
+.PHONY: all clean liberofs FORCE
 
 all: $(DIST_DIR)/erofs.js
 
-$(LIBEROFS_A):
+$(LIBEROFS_A): FORCE
 	@if [ ! -f "configure" ]; then \
 		./autogen.sh; \
 	fi
-	@if [ ! -f "Makefile" ]; then \
+	@if [ ! -f "Makefile" ] || ! grep -q "wasm32-unknown-emscripten" Makefile 2>/dev/null; then \
+		if [ -f "Makefile" ]; then make clean || true; rm -f Makefile; fi; \
+		rm -rf lib/.libs/liberofs.a lib/*.o lib/*.lo; \
 		emconfigure ./configure --host=wasm32-unknown-emscripten MAX_BLOCK_SIZE=4096 --disable-multithreading --without-zlib --disable-lz4 --disable-lzma --without-uuid; \
 	fi
 	emmake make -C lib
