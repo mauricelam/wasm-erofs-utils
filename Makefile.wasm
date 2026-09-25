@@ -21,6 +21,9 @@ EMCC_FLAGS = -O2 -Iinclude -Ilz4/lib -I. \
 all: $(DIST_DIR)/erofs.js
 
 $(LIBEROFS_A): FORCE
+	@if [ ! -f "lz4/lib/lz4.h" ]; then \
+		git submodule update --init --recursive || true; \
+	fi
 	@if [ ! -f "configure" ]; then \
 		./autogen.sh; \
 	fi
