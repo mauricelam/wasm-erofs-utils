@@ -55,7 +55,8 @@ if ENABLE_LZ4HC
 liberofs_la_SOURCES += compressor_lz4hc.c
 endif
 if ENABLE_LZ4_INTERNAL
-liberofs_la_SOURCES += lz4.c lz4hc.c
+liberofs_la_CFLAGS += -I$(top_srcdir)/lz4/lib
+liberofs_la_SOURCES += $(top_srcdir)/lz4/lib/lz4.c $(top_srcdir)/lz4/lib/lz4hc.c
 endif
 endif
 if ENABLE_LIBLZMA

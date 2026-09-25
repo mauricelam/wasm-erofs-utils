@@ -5,7 +5,7 @@ RANLIB = emranlib
 DIST_DIR = dist
 LIBEROFS_A = lib/.libs/liberofs.a
 
-EMCC_FLAGS = -O2 -Iinclude -I. \
+EMCC_FLAGS = -O2 -Iinclude -Ilz4/lib -I. \
     -s WASM=1 \
     -s MODULARIZE=1 \
     -s EXPORT_NAME="createErofsModule" \
