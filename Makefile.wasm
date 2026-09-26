@@ -30,15 +30,15 @@ $(LIBEROFS_A): FORCE
 	@if [ ! -f "Makefile" ] || ! grep -q "wasm32-unknown-emscripten" Makefile 2>/dev/null; then \
 		if [ -f "Makefile" ]; then make clean || true; rm -f Makefile; fi; \
 		rm -rf lib/.libs/liberofs.a lib/*.o lib/*.lo; \
-		emconfigure ./configure --host=wasm32-unknown-emscripten MAX_BLOCK_SIZE=4096 --disable-multithreading --without-zlib --enable-lz4 --disable-lzma --without-uuid; \
+		emconfigure ./configure --host=wasm32-unknown-emscripten MAX_BLOCK_SIZE=4096 --disable-multithreading --without-zlib --disable-lz4 --disable-lzma --without-uuid CFLAGS="-O2 -I$(CURDIR)/lz4/lib -I$(CURDIR)/include -I$(CURDIR) -DLZ4_ENABLED=1 -DLZ4HC_ENABLED=1"; \
 	fi
 	emmake make -C lib
 
 liberofs: $(LIBEROFS_A)
 
-$(DIST_DIR)/erofs.js: wasm/erofs_api.c $(LIBEROFS_A)
+$(DIST_DIR)/erofs.js: wasm/erofs_api.c $(LIBEROFS_A) lz4/lib/lz4.c lz4/lib/lz4hc.c
 	mkdir -p $(DIST_DIR)
-	$(CC) $(EMCC_FLAGS) wasm/erofs_api.c $(LIBEROFS_A) -o $(DIST_DIR)/erofs.js
+	$(CC) $(EMCC_FLAGS) wasm/erofs_api.c lib/compressor_lz4.c lib/compressor_lz4hc.c lz4/lib/lz4.c lz4/lib/lz4hc.c $(LIBEROFS_A) -o $(DIST_DIR)/erofs.js
 
 clean:
 	rm -rf $(DIST_DIR)
