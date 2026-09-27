@@ -22,7 +22,8 @@ all: $(DIST_DIR)/erofs.js
 
 $(LIBEROFS_A): FORCE
 	@if [ ! -f "lz4/lib/lz4.h" ]; then \
-		git submodule update --init --recursive || true; \
+		echo "Error: LZ4 submodule not found. Please run 'git submodule update --init --recursive'" >&2; \
+		exit 1; \
 	fi
 	@if [ ! -f "configure" ]; then \
 		./autogen.sh; \
